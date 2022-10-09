@@ -66,3 +66,225 @@ scrape_configs:
         {% for node_exporter_url in app_prometheus_node_exporter_urls %}
         - {{ node_exporter_url }}
         {% endfor %}
+
+  - job_name: 'synapse'
+    metrics_path: /metrics/synapse/main-process
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          job: "matrix_master"
+
+  - job_name: 'matrix-synapse-worker-generic-0'
+    metrics_path: /metrics/synapse/worker/generic-worker-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: generic-worker-0
+          job: "matrix_generic_worker"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-stream-writer-0-events'
+    metrics_path: /metrics/synapse/worker/stream-writer-0-events
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: stream-writer-0-events
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-stream-writer-1-typing'
+    metrics_path: /metrics/synapse/worker/stream-writer-1-typing
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: stream-writer-1-typing
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-stream-writer-2-to-device'
+    metrics_path: /metrics/synapse/worker/stream-writer-2-to_device
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: stream-writer-2-to_device
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-stream-writer-3-account-data'
+    metrics_path: /metrics/synapse/worker/stream-writer-3-account_data
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: stream-writer-3-account_data
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-stream-writer-4-receipts'
+    metrics_path: /metrics/synapse/worker/stream-writer-4-receipts
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: stream-writer-4-receipts
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-stream-writer-5-presence'
+    metrics_path: /metrics/synapse/worker/stream-writer-5-presence
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: stream-writer-5-presence
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-federation-sender-0'
+    metrics_path: /metrics/synapse/worker/federation-sender-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: federation-sender-0
+          job: "matrix_federation_sender"
+          app: matrix_federation_sender
+
+  - job_name: 'matrix-synapse-worker-pusher-0'
+    metrics_path: /metrics/synapse/worker/pusher-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: pusher-0
+          job: "matrix_pusher"
+          app: matrix_pusher
+
+  - job_name: 'matrix-synapse-worker-appservice-0'
+    metrics_path: /metrics/synapse/worker/appservice-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: appservice-0
+          job: "matrix_appservice"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-user-dir-0'
+    metrics_path: /metrics/synapse/worker/user-dir-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: user-dir-0
+          job: "matrix_user_dir"
+          app: matrix_generic_worker
+
+  - job_name: 'matrix-synapse-worker-media-repository-0'
+    metrics_path: /metrics/synapse/worker/media-repository-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: media-repository-0
+          job: "matrix_media_repository"
+          app: matrix_media_repository
+
+  - job_name: 'matrix-synapse-worker-background-0'
+    metrics_path: /metrics/synapse/worker/background-0
+    scheme: https
+    basic_auth:
+      username: "{{ app_prometheus_matrix_username }}"
+      password: "{{ app_prometheus_matrix_password }}"
+    static_configs:
+      - targets:
+        {% for matrix_url in app_prometheus_matrix_urls %}
+        - {{ matrix_url }}
+        {% endfor %}
+        labels:
+          worker_id: background-0
+          job: "matrix_background"
+          app: matrix_generic_worker

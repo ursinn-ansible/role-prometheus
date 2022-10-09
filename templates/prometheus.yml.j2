@@ -75,9 +75,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         job: "matrix_master"
 
@@ -89,9 +87,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: generic-worker-0
         job: "matrix_generic_worker"
@@ -105,9 +101,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: stream-writer-0-events
         job: "matrix_stream_writer"
@@ -121,9 +115,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: stream-writer-1-typing
         job: "matrix_stream_writer"
@@ -137,9 +129,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: stream-writer-2-to_device
         job: "matrix_stream_writer"
@@ -153,9 +143,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: stream-writer-3-account_data
         job: "matrix_stream_writer"
@@ -169,9 +157,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: stream-writer-4-receipts
         job: "matrix_stream_writer"
@@ -185,9 +171,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: stream-writer-5-presence
         job: "matrix_stream_writer"
@@ -201,9 +185,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: federation-sender-0
         job: "matrix_federation_sender"
@@ -217,9 +199,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: pusher-0
         job: "matrix_pusher"
@@ -233,9 +213,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: appservice-0
         job: "matrix_appservice"
@@ -249,9 +227,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: user-dir-0
         job: "matrix_user_dir"
@@ -265,9 +241,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: media-repository-0
         job: "matrix_media_repository"
@@ -281,9 +255,7 @@ scrape_configs:
       password: "{{ app_prometheus_matrix_password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
+        - {{ app_prometheus_matrix_url }}
       labels:
         worker_id: background-0
         job: "matrix_background"

@@ -1,25 +1,18 @@
 ---
-- name: Create directory
-  ansible.builtin.file:
-    path: /opt/app-prometheus/config
-    state: directory
-    owner: docker_files
-    group: docker_files
-    mode: 0755
+- name: Create prometheus config volume
+  community.docker.docker_volume:
+    name: app_prometheus_config
 
-- name: Copy prometheus file
-  ansible.builtin.template:
-    src: prometheus.yml.j2
-    dest: /opt/app-prometheus/config/prometheus.yml
-    owner: docker_files
-    group: docker_files
-    mode: 0644
+- name: Create prometheus data volume
+  community.docker.docker_volume:
+    name: app_prometheus_data
 
 - name: Ensure prom/prometheus image is pulled
   community.docker.docker_image:
     name: docker.io/prom/prometheus
     source: pull
     force_source: yes
+  register: pulled
 
 - name: Remove prometheus container
   community.docker.docker_container:
@@ -27,25 +20,58 @@
     state: absent
   when: pulled.changed
 
-- name: Create prometheus-data volume
-  community.docker.docker_volume:
-    name: prometheus-data
-
 - name: Get infos on prometheus container
   community.docker.docker_container_info:
     name: prometheus
   register: result
 
 - name: Create prometheus container
-  ansible.builtin.shell: |
-    docker run -d \
-    --name=prometheus \
-    -v /opt/app-prometheus/config:/etc/prometheus:Z \
-    -v prometheus-data:/prometheus:Z \
-    --network=app-network \
-    --restart unless-stopped \
-    docker.io/prom/prometheus
+  community.docker.docker_container:
+    image: docker.io/prom/prometheus
+    mounts:
+     - source: app_prometheus_config
+       target: /etc/prometheus
+     - source: app_prometheus_data
+       target: /prometheus
+    name: prometheus
+    networks:
+     - name: app-network
+    restart_policy: unless-stopped
+    state: started
   when:
     pulled.changed
     or
+    result.exists == false
+
+- name: Create tmp prometheus directory
+  ansible.builtin.file:
+    path: /opt/tmp-prometheus
+    state: directory
+  when:
+    result.exists == false
+
+- name: Copy prometheus file
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /opt/tmp-prometheus/prometheus.yml
+  when:
+    result.exists == false
+
+- name: Copy config file into prometheus container
+  shell: docker cp /opt/tmp-prometheus/prometheus.yml prometheus:/etc/prometheus
+  when:
+    result.exists == false
+
+- name: Remove tmp prometheus directory
+  ansible.builtin.file:
+    path: /opt/tmp-prometheus
+    state: absent
+  when:
+    result.exists == false
+
+- name: Restart prometheus container
+  community.docker.docker_container:
+    name: prometheus
+    restart: yes
+  when:
     result.exists == false

@@ -1,11 +1,11 @@
 ---
 - name: Create prometheus config volume
   community.docker.docker_volume:
-    name: app_prometheus_config
+    name: prometheus_config
 
 - name: Create prometheus data volume
   community.docker.docker_volume:
-    name: app_prometheus_data
+    name: prometheus_data
 
 - name: Ensure prom/prometheus image is pulled
   community.docker.docker_image:
@@ -29,9 +29,9 @@
   community.docker.docker_container:
     image: docker.io/prom/prometheus
     mounts:
-     - source: app_prometheus_config
+     - source: prometheus_config
        target: /etc/prometheus
-     - source: app_prometheus_data
+     - source: prometheus_data
        target: /prometheus
     name: prometheus
     networks:

@@ -74,6 +74,14 @@ scrape_configs:
         - {{ bird_exporter_url }}:9324
         {% endfor %}
 
+  - job_name: flow-exporter
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+        {% for flow_exporter_url in app_prometheus_flow_exporter_urls %}
+        - {{ flow_exporter_url }}:9590
+        {% endfor %}
+
   - job_name: 'synapse'
     metrics_path: /metrics/synapse/main-process
     scheme: https

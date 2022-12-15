@@ -57,14 +57,21 @@ scrape_configs:
     static_configs:
       - targets:
         {% for promtail_url in app_prometheus_promtail_urls %}
-        - {{ promtail_url }}
+        - {{ promtail_url }}:9080
         {% endfor %}
 
   - job_name: node_exporter
     static_configs:
       - targets:
         {% for node_exporter_url in app_prometheus_node_exporter_urls %}
-        - {{ node_exporter_url }}
+        - {{ node_exporter_url }}:9100
+        {% endfor %}
+
+  - job_name: bird_exporter
+    static_configs:
+      - targets:
+        {% for bird_exporter_url in app_prometheus_bird_exporter_urls %}
+        - {{ bird_exporter_url }}:9324
         {% endfor %}
 
   - job_name: 'synapse'

@@ -11,3 +11,7 @@ app_prometheus_loki_password: ""
 app_prometheus_loki_urls: []
 app_prometheus_promtail_urls: []
 app_prometheus_node_exporter_urls: []
+app_prometheus_matrix_username: ""
+app_prometheus_matrix_password: ""
+app_prometheus_matrix_urls: []
+app_prometheus_bird_exporter_urls: []

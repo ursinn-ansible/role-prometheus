@@ -82,6 +82,14 @@ scrape_configs:
         - {{ flow_exporter_url }}:9590
         {% endfor %}
 
+  - job_name: 'bgptools-export'
+    scheme: https
+    metrics_path: /prom/{{ app_prometheus_bgptools_export_id }}
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - bgp.tools
+
   - job_name: 'synapse'
     metrics_path: /metrics/synapse/main-process
     scheme: https

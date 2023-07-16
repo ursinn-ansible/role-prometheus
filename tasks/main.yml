@@ -1,3 +1,77 @@
 ---
-- include_tasks: "{{ role_path }}/tasks/setup.yml"
-  when: "app_prometheus_enabled|bool"
+- name: Create prometheus config volume
+  community.docker.docker_volume:
+    name: prometheus_config
+
+- name: Create prometheus data volume
+  community.docker.docker_volume:
+    name: prometheus_data
+
+- name: Ensure prom/prometheus image is pulled
+  community.docker.docker_image:
+    name: docker.io/prom/prometheus
+    source: pull
+    force_source: yes
+  register: pulled
+
+- name: Remove prometheus container
+  community.docker.docker_container:
+    name: prometheus
+    state: absent
+  when: pulled.changed
+
+- name: Get infos on prometheus container
+  community.docker.docker_container_info:
+    name: prometheus
+  register: result
+
+- name: Create prometheus container
+  community.docker.docker_container:
+    image: docker.io/prom/prometheus
+    mounts:
+     - source: prometheus_config
+       target: /etc/prometheus
+     - source: prometheus_data
+       target: /prometheus
+    name: prometheus
+    networks:
+     - name: app-network
+    restart_policy: unless-stopped
+    state: started
+  when:
+    pulled.changed
+    or
+    result.exists == false
+
+- name: Create tmp prometheus directory
+  ansible.builtin.file:
+    path: /opt/tmp-prometheus
+    state: directory
+  when:
+    result.exists == false
+
+- name: Copy prometheus file
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /opt/tmp-prometheus/prometheus.yml
+  when:
+    result.exists == false
+
+- name: Copy config file into prometheus container
+  shell: docker cp /opt/tmp-prometheus/prometheus.yml prometheus:/etc/prometheus
+  when:
+    result.exists == false
+
+- name: Remove tmp prometheus directory
+  ansible.builtin.file:
+    path: /opt/tmp-prometheus
+    state: absent
+  when:
+    result.exists == false
+
+- name: Restart prometheus container
+  community.docker.docker_container:
+    name: prometheus
+    restart: yes
+  when:
+    result.exists == false

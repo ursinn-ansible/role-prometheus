@@ -1,5 +1,4 @@
 ---
-app_prometheus_enabled: false
 app_prometheus_prometheus_username: ""
 app_prometheus_prometheus_password: ""
 app_prometheus_prometheus_urls: []

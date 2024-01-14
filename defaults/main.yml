@@ -1,18 +1,32 @@
 ---
-app_prometheus_prometheus_username: ""
-app_prometheus_prometheus_password: ""
-app_prometheus_prometheus_urls: []
-app_prometheus_grafana_username: ""
-app_prometheus_grafana_password: ""
-app_prometheus_grafana_urls: []
-app_prometheus_loki_username: ""
-app_prometheus_loki_password: ""
-app_prometheus_loki_urls: []
-app_prometheus_promtail_urls: []
-app_prometheus_node_exporter_urls: []
-app_prometheus_matrix_username: ""
-app_prometheus_matrix_password: ""
-app_prometheus_matrix_urls: []
-app_prometheus_bird_exporter_urls: []
-app_prometheus_flow_exporter_urls: []
-app_prometheus_bgptools_export_id: ""
+app_prometheus:
+  prometheus:
+    username: ""
+    password: ""
+    password_hash: ""
+    urls: []
+  grafana:
+    username: ""
+    password: ""
+    urls: []
+  loki:
+    username: ""
+    password: ""
+    urls: []
+  matrix:
+    username: ""
+    password: ""
+    urls: []
+  promtail:
+    username: ""
+    password: ""
+    urls: []
+  node_exporter:
+    username: ""
+    password: ""
+    urls: []
+  bird_exporter:
+    urls: []
+  flow_exporter:
+    urls: []
+  bgptools_export_id: ""

@@ -34,6 +34,7 @@
      - source: prometheus_data
        target: /prometheus
     name: prometheus
+    command: --web.config.file=/etc/prometheus/web-config.yml --config.file=/etc/prometheus/prometheus.yml
     networks:
      - name: app-network
     restart_policy: unless-stopped
@@ -50,15 +51,18 @@
   when:
     result.exists == false
 
-- name: Copy prometheus file
+- name: Copy prometheus files
   ansible.builtin.template:
-    src: prometheus.yml.j2
-    dest: /opt/tmp-prometheus/prometheus.yml
+    src: "{{ item }}.yml.j2"
+    dest: "/opt/tmp-prometheus/{{ item }}.yml"
+  with_items:
+    - "prometheus"
+    - "web-config"
   when:
     result.exists == false
 
-- name: Copy config file into prometheus container
-  shell: docker cp /opt/tmp-prometheus/prometheus.yml prometheus:/etc/prometheus
+- name: Copy config files into prometheus container
+  shell: docker cp /opt/tmp-prometheus/. prometheus:/etc/prometheus
   when:
     result.exists == false
 

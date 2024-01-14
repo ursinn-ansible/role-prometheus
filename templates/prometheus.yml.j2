@@ -20,312 +20,329 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-{% if app_prometheus_prometheus_urls is defined %}
+{% set prometheus = app_prometheus.prometheus %}
+{% if prometheus.urls is defined %}
   - job_name: prometheus
     scheme: 'https'
     basic_auth:
-      username: "{{ app_prometheus_prometheus_username }}"
-      password: "{{ app_prometheus_prometheus_password }}"
+      username: "{{ prometheus.username }}"
+      password: "{{ prometheus.password }}"
     static_configs:
       - targets:
-        {% for prometheus_url in app_prometheus_prometheus_urls %}
-        - {{ prometheus_url }}
-        {% endfor %}
+{% for url in prometheus.urls %}
+        - {{ url }}
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_grafana_urls is defined %}
+{% set grafana = app_prometheus.grafana %}
+{% if grafana.urls is defined %}
   - job_name: grafana
     scheme: 'https'
     basic_auth:
-      username: "{{ app_prometheus_grafana_username }}"
-      password: "{{ app_prometheus_grafana_password }}"
+      username: "{{ grafana.username }}"
+      password: "{{ grafana.password }}"
     static_configs:
       - targets:
-        {% for grafana_url in app_prometheus_grafana_urls %}
-        - {{ grafana_url }}
-        {% endfor %}
+{% for url in grafana.urls %}
+        - {{ url }}
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_loki_urls is defined %}
+{% set loki = app_prometheus.loki %}
+{% if loki.urls is defined %}
   - job_name: loki
     scheme: 'https'
     basic_auth:
-      username: "{{ app_prometheus_loki_username }}"
-      password: "{{ app_prometheus_loki_password }}"
+      username: "{{ loki.username }}"
+      password: "{{ loki.password }}"
     static_configs:
-      - targets: 
-        {% for loki_url in app_prometheus_loki_urls %}
-        - {{ loki_url }}
-        {% endfor %}
+      - targets:
+{% for url in loki.urls %}
+        - {{ url }}
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_promtail_urls is defined %}
+{% set promtail = app_prometheus.promtail %}
+{% if promtail.urls is defined %}
   - job_name: promtail
+    scheme: 'https'
+    basic_auth:
+      username: "{{ promtail.username }}"
+      password: "{{ promtail.password }}"
     static_configs:
       - targets:
-        {% for promtail_url in app_prometheus_promtail_urls %}
-        - {{ promtail_url }}:9080
-        {% endfor %}
+{% for url in promtail.urls %}
+        - {{ url }}
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_node_exporter_urls is defined %}
+{% set node_exporter = app_prometheus.node_exporter %}
+{% if node_exporter.urls is defined %}
   - job_name: node_exporter
+    scheme: 'https'
+    basic_auth:
+      username: "{{ node_exporter.username }}"
+      password: "{{ node_exporter.password }}"
     static_configs:
-      - targets:
-        {% for node_exporter_url in app_prometheus_node_exporter_urls %}
-        - {{ node_exporter_url }}:9100
-        {% endfor %}
+{% for node_exporter_item in node_exporter.urls %}
+      - targets: [{{ node_exporter_item.url }}]
+        labels:
+          instance: {{ node_exporter_item.label }}
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_bird_exporter_urls is defined %}
+{% set bird_exporter = app_prometheus.bird_exporter %}
+{% if bird_exporter.urls is defined %}
   - job_name: bird_exporter
     static_configs:
       - targets:
-        {% for bird_exporter_url in app_prometheus_bird_exporter_urls %}
-        - {{ bird_exporter_url }}:9324
-        {% endfor %}
+{% for url in bird_exporter.urls %}
+        - {{ url }}:9324
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_flow_exporter_urls is defined %}
+{% set flow_exporter = app_prometheus.flow_exporter %}
+{% if flow_exporter.urls is defined %}
   - job_name: flow-exporter
     scrape_interval: 5s
     static_configs:
-      - targets: 
-        {% for flow_exporter_url in app_prometheus_flow_exporter_urls %}
-        - {{ flow_exporter_url }}:9590
-        {% endfor %}
+      - targets:
+{% for url in flow_exporter.urls %}
+        - {{ url }}:9590
+{% endfor %}
 {% endif %}
 
-{% if app_prometheus_bgptools_export_id is defined %}
+{% if app_prometheus.bgptools_export_id is defined %}
   - job_name: 'bgptools-export'
     scheme: https
-    metrics_path: /prom/{{ app_prometheus_bgptools_export_id }}
+    metrics_path: /prom/{{ app_prometheus.bgptools_export_id }}
     scrape_interval: 30s
     static_configs:
       - targets:
           - bgp.tools
 {% endif %}
 
-{% if app_prometheus_matrix_urls is defined %}
+{% set matrix = app_prometheus.matrix %}
+{% if matrix.urls is defined %}
   - job_name: 'synapse'
     metrics_path: /metrics/synapse/main-process
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        job: "matrix_master"
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          job: "matrix_master"
 
   - job_name: 'matrix-synapse-worker-generic-0'
     metrics_path: /metrics/synapse/worker/generic-worker-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: generic-worker-0
-#        job: "matrix_generic_worker"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: generic-worker-0
+          job: "matrix_generic_worker"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-stream-writer-0-events'
     metrics_path: /metrics/synapse/worker/stream-writer-0-events
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: stream-writer-0-events
-#        job: "matrix_stream_writer"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: stream-writer-0-events
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-stream-writer-1-typing'
     metrics_path: /metrics/synapse/worker/stream-writer-1-typing
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: stream-writer-1-typing
-#        job: "matrix_stream_writer"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: stream-writer-1-typing
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-stream-writer-2-to-device'
     metrics_path: /metrics/synapse/worker/stream-writer-2-to_device
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: stream-writer-2-to_device
-#        job: "matrix_stream_writer"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: stream-writer-2-to_device
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-stream-writer-3-account-data'
     metrics_path: /metrics/synapse/worker/stream-writer-3-account_data
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: stream-writer-3-account_data
-#        job: "matrix_stream_writer"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: stream-writer-3-account_data
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-stream-writer-4-receipts'
     metrics_path: /metrics/synapse/worker/stream-writer-4-receipts
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: stream-writer-4-receipts
-#        job: "matrix_stream_writer"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: stream-writer-4-receipts
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-stream-writer-5-presence'
     metrics_path: /metrics/synapse/worker/stream-writer-5-presence
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: stream-writer-5-presence
-#        job: "matrix_stream_writer"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: stream-writer-5-presence
+          job: "matrix_stream_writer"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-federation-sender-0'
     metrics_path: /metrics/synapse/worker/federation-sender-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: federation-sender-0
-#        job: "matrix_federation_sender"
-#        app: matrix_federation_sender
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: federation-sender-0
+          job: "matrix_federation_sender"
+          app: matrix_federation_sender
 
   - job_name: 'matrix-synapse-worker-pusher-0'
     metrics_path: /metrics/synapse/worker/pusher-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: pusher-0
-#        job: "matrix_pusher"
-#        app: matrix_pusher
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: pusher-0
+          job: "matrix_pusher"
+          app: matrix_pusher
 
   - job_name: 'matrix-synapse-worker-appservice-0'
     metrics_path: /metrics/synapse/worker/appservice-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: appservice-0
-#        job: "matrix_appservice"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: appservice-0
+          job: "matrix_appservice"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-user-dir-0'
     metrics_path: /metrics/synapse/worker/user-dir-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: user-dir-0
-#        job: "matrix_user_dir"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: user-dir-0
+          job: "matrix_user_dir"
+          app: matrix_generic_worker
 
   - job_name: 'matrix-synapse-worker-media-repository-0'
     metrics_path: /metrics/synapse/worker/media-repository-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: media-repository-0
-#        job: "matrix_media_repository"
-#        app: matrix_media_repository
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: media-repository-0
+          job: "matrix_media_repository"
+          app: matrix_media_repository
 
   - job_name: 'matrix-synapse-worker-background-0'
     metrics_path: /metrics/synapse/worker/background-0
     scheme: https
     basic_auth:
-      username: "{{ app_prometheus_matrix_username }}"
-      password: "{{ app_prometheus_matrix_password }}"
+      username: "{{ matrix.username }}"
+      password: "{{ matrix.password }}"
     static_configs:
       - targets:
-        {% for matrix_url in app_prometheus_matrix_urls %}
-        - {{ matrix_url }}
-        {% endfor %}
-#    labels:
-#        worker_id: background-0
-#        job: "matrix_background"
-#        app: matrix_generic_worker
+{% for url in matrix.urls %}
+        - {{ url }}
+{% endfor %}
+        labels:
+          worker_id: background-0
+          job: "matrix_background"
+          app: matrix_generic_worker
 {% endif %}

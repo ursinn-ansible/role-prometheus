@@ -20,102 +20,95 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-{% set prometheus = app_prometheus.prometheus %}
-{% if prometheus.urls is defined %}
+{% if app_prometheus_urls is defined %}
   - job_name: prometheus
     scheme: 'https'
     basic_auth:
-      username: "{{ prometheus.username }}"
-      password: "{{ prometheus.password }}"
+      username: "{{ app_prometheus_username }}"
+      password: "{{ app_prometheus_password }}"
     static_configs:
       - targets:
-{% for url in prometheus.urls %}
+{% for url in app_prometheus_urls %}
         - {{ url }}
 {% endfor %}
 {% endif %}
 
-{% set grafana = app_prometheus.grafana %}
-{% if grafana.urls is defined %}
+{% if app_prometheus_grafana_urls is defined %}
   - job_name: grafana
     scheme: 'https'
     basic_auth:
-      username: "{{ grafana.username }}"
-      password: "{{ grafana.password }}"
+      username: "{{ app_prometheus_grafana_username }}"
+      password: "{{ app_prometheus_grafana_password }}"
     static_configs:
       - targets:
-{% for url in grafana.urls %}
+{% for url in app_prometheus_grafana_urls %}
         - {{ url }}
 {% endfor %}
 {% endif %}
 
-{% set loki = app_prometheus.loki %}
-{% if loki.urls is defined %}
+{% if app_prometheus_loki_urls is defined %}
   - job_name: loki
     scheme: 'https'
     basic_auth:
-      username: "{{ loki.username }}"
-      password: "{{ loki.password }}"
+      username: "{{ app_prometheus_loki_username }}"
+      password: "{{ app_prometheus_loki_password }}"
     static_configs:
       - targets:
-{% for url in loki.urls %}
+{% for url in app_prometheus_loki_urls %}
         - {{ url }}
 {% endfor %}
 {% endif %}
 
-{% set promtail = app_prometheus.promtail %}
-{% if promtail.urls is defined %}
+{% if app_prometheus_promtail_urls is defined %}
   - job_name: promtail
     scheme: 'https'
     basic_auth:
-      username: "{{ promtail.username }}"
-      password: "{{ promtail.password }}"
+      username: "{{ app_prometheus_promtail_username }}"
+      password: "{{ app_prometheus_promtail_password }}"
     static_configs:
       - targets:
-{% for url in promtail.urls %}
+{% for url in app_prometheus_promtail_urls %}
         - {{ url }}
 {% endfor %}
 {% endif %}
 
-{% set node_exporter = app_prometheus.node_exporter %}
-{% if node_exporter.urls is defined %}
+{% if app_prometheus_node_exporter_urls is defined %}
   - job_name: node_exporter
-    scheme: 'https'
+    #scheme: 'https'
     basic_auth:
-      username: "{{ node_exporter.username }}"
-      password: "{{ node_exporter.password }}"
+      username: "{{ app_prometheus_node_exporter_username }}"
+      password: "{{ app_prometheus_node_exporter_password }}"
     static_configs:
-{% for node_exporter_item in node_exporter.urls %}
+{% for node_exporter_item in app_prometheus_node_exporter_urls %}
       - targets: [{{ node_exporter_item.url }}]
         labels:
           instance: {{ node_exporter_item.label }}
 {% endfor %}
 {% endif %}
 
-{% set bird_exporter = app_prometheus.bird_exporter %}
-{% if bird_exporter.urls is defined %}
+{% if app_prometheus_bird_exporter_urls is defined %}
   - job_name: bird_exporter
     static_configs:
       - targets:
-{% for url in bird_exporter.urls %}
+{% for url in app_prometheus_bird_exporter_urls %}
         - {{ url }}:9324
 {% endfor %}
 {% endif %}
 
-{% set flow_exporter = app_prometheus.flow_exporter %}
-{% if flow_exporter.urls is defined %}
+{% if app_prometheus_flow_exporter_urls is defined %}
   - job_name: flow-exporter
     scrape_interval: 5s
     static_configs:
       - targets:
-{% for url in flow_exporter.urls %}
+{% for url in app_prometheus_flow_exporter_urls %}
         - {{ url }}:9590
 {% endfor %}
 {% endif %}
 
-{% if app_prometheus.bgptools_export_id is defined %}
+{% if app_prometheus_bgptools_export_id is defined %}
   - job_name: 'bgptools-export'
     scheme: https
-    metrics_path: /prom/{{ app_prometheus.bgptools_export_id }}
+    metrics_path: /prom/{{ app_prometheus_bgptools_export_id }}
     scrape_interval: 30s
     static_configs:
       - targets:

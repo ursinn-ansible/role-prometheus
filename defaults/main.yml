@@ -1,4 +1,12 @@
 ---
+app_prometheus_docker_volume_config: prometheus_config
+app_prometheus_docker_volume_data: prometheus_data
+app_prometheus_docker_image: docker.io/prom/prometheus
+app_prometheus_docker_container: prometheus
+app_prometheus_docker_network: app-network
+
+app_prometheus_tmp_dir: "/tmp/ansible-role-prometheus"
+
 app_prometheus:
   prometheus:
     username: ""

@@ -9,34 +9,20 @@ Docker Image: https://registry.hub.docker.com/r/prom/prometheus
 
 | Option | Default Value |
 | ---- | ---- |
-| app_prometheus_docker_volume_config | prometheus_config |
-| app_prometheus_docker_volume_data | prometheus_data |
-| app_prometheus_docker_image | docker.io/prom/prometheus |
-| app_prometheus_docker_container | prometheus |
-| app_prometheus_docker_network | app-network |
-| app_prometheus_tmp_dir | /tmp/ansible-role-prometheus |
-| app_prometheus.prometheus.username | |
-| app_prometheus.prometheus.password | |
-| app_prometheus.prometheus.password_hash | |
-| app_prometheus.prometheus.urls | [] |
-| app_prometheus.grafana.username | |
-| app_prometheus.grafana.password | |
-| app_prometheus.grafana.urls | [] |
-| app_prometheus.loki.username | |
-| app_prometheus.loki.password | |
-| app_prometheus.loki.urls | [] |
-| app_prometheus.matrix.username | |
-| app_prometheus.matrix.password | |
-| app_prometheus.matrix.urls | [] |
-| app_prometheus.promtail.username | |
-| app_prometheus.promtail.password | |
-| app_prometheus.promtail.urls | [] |
-| app_prometheus.node_exporter.username | |
-| app_prometheus.node_exporter.password | |
-| app_prometheus.node_exporter.urls | [] |
-| app_prometheus.bird_exporter.urls | [] |
-| app_prometheus.flow_exporter.urls | [] |
-| app_prometheus.bgptools_export_id | |
+| role_prometheus_image | docker.io/prom/prometheus:v3.0.0 |
+| role_prometheus_container | prometheus |
+| role_prometheus_volume | prometheus |
+| role_prometheus_network | app-network |
+| role_prometheus_tmp_dir | /tmp/ansible-role-prometheus |
+| role_prometheus_config_targets | |
+| role_prometheus_config_targets_basicAuth | |
+| role_prometheus_config_targets_bgptools_export_id | |
+| role_prometheus_config_targets_node_exporter | [] |
+| role_prometheus_config_targets_node_exporter_username | |
+| role_prometheus_config_targets_node_exporter_password | |
+| role_prometheus_config_targets_matrix | [] |
+| role_prometheus_config_targets_matrix_username | |
+| role_prometheus_config_targets_matrix_password | |
 
 ## License
 

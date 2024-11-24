@@ -1,12 +1,12 @@
 ---
 - name: set vars
   set_fact:
-    docker_image: '{{ app_prometheus_docker_image }}'
-    docker_container: '{{ app_prometheus_docker_container }}'
-    docker_volume_config: '{{ app_prometheus_docker_volume_config }}'
-    docker_volume_data: '{{ app_prometheus_docker_volume_data }}'
-    docker_network: '{{ app_prometheus_docker_network }}'
-    tmp_dir: '{{ app_prometheus_tmp_dir }}'
+    docker_image: '{{ role_prometheus_image }}'
+    docker_container: '{{ role_prometheus_container }}'
+    docker_volume_config: '{{ role_prometheus_volume }}_config'
+    docker_volume_data: '{{ role_prometheus_volume }}_data'
+    docker_network: '{{ role_prometheus_network }}'
+    tmp_dir: '{{ role_prometheus_tmp_dir }}'
 
 - name: Ensure image is pulled
   community.docker.docker_image:
@@ -43,13 +43,10 @@
 - name: Create prometheus container
   community.docker.docker_container:
     image: "{{ docker_image }}"
-    mounts:
-     - source: "{{ docker_volume_config }}"
-       target: /etc/prometheus
-     - source: "{{ docker_volume_data }}"
-       target: /prometheus
+    volumes:
+     - '{{ docker_volume_config }}:/etc/prometheus:Z'
+     - '{{ docker_volume_data }}:/prometheus:Z'
     name: "{{ docker_container }}"
-    command: --web.config.file=/etc/prometheus/web-config.yml --config.file=/etc/prometheus/prometheus.yml
     networks:
      - name: "{{ docker_network }}"
     restart_policy: unless-stopped
@@ -66,18 +63,15 @@
   when:
     result.exists == false
 
-- name: Copy prometheus files
+- name: Copy prometheus file
   ansible.builtin.template:
-    src: "{{ item }}.yml.j2"
-    dest: "{{ tmp_dir }}/{{ item }}.yml"
-  with_items:
-    - "prometheus"
-    - "web-config"
+    src: prometheus.yml.j2
+    dest: "{{ tmp_dir }}/prometheus.yml"
   when:
     result.exists == false
 
-- name: Copy config files into prometheus container
-  shell: "docker cp {{ app_prometheus_tmp_dir }}/. {{ docker_container }}:/etc/prometheus"
+- name: Copy config file into prometheus container
+  shell: "docker cp {{ tmp_dir }}/prometheus.yml {{ docker_container }}:/etc/prometheus"
   when:
     result.exists == false
 

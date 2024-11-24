@@ -1,131 +1,159 @@
-# my global config
 global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-  # scrape_timeout is set to the global default (10s).
+  # How frequently to scrape targets from this job.
+  scrape_interval: 15s
 
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          # - alertmanager:9093
+  # How frequently to evaluate rules.
+  evaluation_interval: 30s
 
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+  # Per-scrape limit on the number of scraped samples that will be accepted.
+  # If more than this number of samples are present after metric relabeling
+  # the entire scrape will be treated as failed. 0 means no limit.
+  sample_limit: 1500
 
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
+  # Limit on the number of labels that will be accepted per sample. If more
+  # than this number of labels are present on any sample post metric-relabeling,
+  # the entire scrape will be treated as failed. 0 means no limit.
+  label_limit: 30
+  
+  # Limit on the length (in bytes) of each individual label name. If any label
+  # name in a scrape is longer than this number post metric-relabeling, the
+  # entire scrape will be treated as failed. Note that label names are UTF-8
+  # encoded, and characters can take up to 4 bytes. 0 means no limit.
+  label_name_length_limit: 200
+
+  # Limit on the length (in bytes) of each individual label value. If any label
+  # value in a scrape is longer than this number post metric-relabeling, the
+  # entire scrape will be treated as failed. Note that label values are UTF-8
+  # encoded, and characters can take up to 4 bytes. 0 means no limit.
+  label_value_length_limit: 200
+
+  # The labels to add to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager). 
+  # Environment variable references `${var}` or `$var` are replaced according 
+  # to the values of the current environment variables. 
+  # References to undefined variables are replaced by the empty string.
+  # The `$` character can be escaped by using `$$`.
+  external_labels:
+    prometheus_instance: {{ inventory_hostname }}
+
+# A list of scrape configurations.
 scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-{% if app_prometheus_urls is defined %}
   - job_name: prometheus
-    scheme: 'https'
-    basic_auth:
-      username: "{{ app_prometheus_username }}"
-      password: "{{ app_prometheus_password }}"
-    static_configs:
-      - targets:
-{% for url in app_prometheus_urls %}
-        - {{ url }}
-{% endfor %}
-{% endif %}
 
-{% if app_prometheus_grafana_urls is defined %}
-  - job_name: grafana
-    scheme: 'https'
-    basic_auth:
-      username: "{{ app_prometheus_grafana_username }}"
-      password: "{{ app_prometheus_grafana_password }}"
-    static_configs:
-      - targets:
-{% for url in app_prometheus_grafana_urls %}
-        - {{ url }}
-{% endfor %}
-{% endif %}
+    honor_labels: true
+    # scrape_interval is defined by the configured global (15s).
+    # scrape_timeout is defined by the global default (10s).
 
-{% if app_prometheus_loki_urls is defined %}
-  - job_name: loki
-    scheme: 'https'
-    basic_auth:
-      username: "{{ app_prometheus_loki_username }}"
-      password: "{{ app_prometheus_loki_password }}"
-    static_configs:
-      - targets:
-{% for url in app_prometheus_loki_urls %}
-        - {{ url }}
-{% endfor %}
-{% endif %}
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
 
-{% if app_prometheus_promtail_urls is defined %}
-  - job_name: promtail
-    scheme: 'https'
-    basic_auth:
-      username: "{{ app_prometheus_promtail_username }}"
-      password: "{{ app_prometheus_promtail_password }}"
-    static_configs:
-      - targets:
-{% for url in app_prometheus_promtail_urls %}
-        - {{ url }}
-{% endfor %}
-{% endif %}
+    fallback_scrape_protocol: PrometheusText0.0.4
 
-{% if app_prometheus_node_exporter_urls is defined %}
-  - job_name: node_exporter
-    #scheme: 'https'
-    basic_auth:
-      username: "{{ app_prometheus_node_exporter_username }}"
-      password: "{{ app_prometheus_node_exporter_password }}"
+    scrape_failure_log_file: fail_prom.log
+    file_sd_configs:
+      - files:
+          - foo/*.slow.json
+          - foo/*.slow.yml
+          - single/file.yml
+        refresh_interval: 10m
+      - files:
+          - bar/*.yaml
+
     static_configs:
-{% for node_exporter_item in app_prometheus_node_exporter_urls %}
-      - targets: [{{ node_exporter_item.url }}]
+      - targets: ["localhost:9090", "localhost:9191"]
         labels:
-          instance: {{ node_exporter_item.label }}
-{% endfor %}
-{% endif %}
+          my: label
+          your: label
 
-{% if app_prometheus_bird_exporter_urls is defined %}
-  - job_name: bird_exporter
+    http_headers:
+      foo:
+        values: ["foobar"]
+        secrets: ["bar", "foo"]
+        files: ["valid_password_file"]
+
+    relabel_configs:
+      - source_labels: [job, __meta_dns_name]
+        regex: (.*)some-[regex]
+        target_label: job
+        replacement: foo-${1}
+        # action defaults to 'replace'
+      - source_labels: [abc]
+        target_label: cde
+      - replacement: static
+        target_label: abc
+      - regex:
+        replacement: static
+        target_label: abc
+      - source_labels: [foo]
+        target_label: abc
+        action: keepequal
+      - source_labels: [foo]
+        target_label: abc
+        action: dropequal
+
+    authorization:
+      credentials_file: valid_token_file
+
+    tls_config:
+      min_version: TLS10
+
+{% for item in role_prometheus_config_targets %}
+  - job_name: {{ item.key }}
+    scheme: 'https'
     static_configs:
       - targets:
-{% for url in app_prometheus_bird_exporter_urls %}
-        - {{ url }}:9324
+{% for url in item.value.urls %}
+        - {{ url }}
 {% endfor %}
-{% endif %}
+{% endfor %}
 
-{% if app_prometheus_flow_exporter_urls is defined %}
-  - job_name: flow-exporter
-    scrape_interval: 5s
+{% for item in role_prometheus_config_targets_basicAuth %}
+  - job_name: {{ item.key }}
+    scheme: 'https'
+    basic_auth:
+      username: "{{ item.value.username }}"
+      password: "{{ item.value.password  }}"
     static_configs:
       - targets:
-{% for url in app_prometheus_flow_exporter_urls %}
-        - {{ url }}:9590
+{% for url in item.value.urls %}
+        - {{ url }}
 {% endfor %}
-{% endif %}
+{% endfor %}
 
-{% if app_prometheus_bgptools_export_id is defined %}
+{% if role_prometheus_config_targets_bgptools_export_id is defined %}
   - job_name: 'bgptools-export'
     scheme: https
-    metrics_path: /prom/{{ app_prometheus_bgptools_export_id }}
+    metrics_path: /prom/{{ role_prometheus_config_targets_bgptools_export_id }}
     scrape_interval: 30s
     static_configs:
       - targets:
           - bgp.tools
 {% endif %}
 
-{% set matrix = app_prometheus.matrix %}
-{% if matrix.urls is defined %}
+{% if role_prometheus_config_targets_node_exporter is defined %}
+  - job_name: node_exporter
+    #scheme: 'https'
+    basic_auth:
+      username: "{{ role_prometheus_config_targets_node_exporter_username }}"
+      password: "{{ role_prometheus_config_targets_node_exporter_password }}"
+    static_configs:
+{% for node_exporter_item in role_prometheus_config_targets_node_exporter %}
+      - targets: [{{ node_exporter_item.url }}]
+        labels:
+          instance: {{ node_exporter_item.label }}
+{% endfor %}
+{% endif %}
+
+{% if role_prometheus_config_targets_matrix is defined %}
   - job_name: 'synapse'
     metrics_path: /metrics/synapse/main-process
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -135,11 +163,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/generic-worker-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -151,11 +179,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/stream-writer-0-events
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -167,11 +195,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/stream-writer-1-typing
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -183,11 +211,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/stream-writer-2-to_device
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -199,11 +227,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/stream-writer-3-account_data
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -215,11 +243,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/stream-writer-4-receipts
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -231,11 +259,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/stream-writer-5-presence
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -247,11 +275,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/federation-sender-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -263,11 +291,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/pusher-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -279,11 +307,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/appservice-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -295,11 +323,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/user-dir-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -311,11 +339,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/media-repository-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:
@@ -327,11 +355,11 @@ scrape_configs:
     metrics_path: /metrics/synapse/worker/background-0
     scheme: https
     basic_auth:
-      username: "{{ matrix.username }}"
-      password: "{{ matrix.password }}"
+      username: "{{ role_prometheus_config_targets_matrix_username }}"
+      password: "{{ role_prometheus_config_targets_matrix_password }}"
     static_configs:
       - targets:
-{% for url in matrix.urls %}
+{% for url in role_prometheus_config_targets_matrix %}
         - {{ url }}
 {% endfor %}
         labels:

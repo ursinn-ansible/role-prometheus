@@ -14,7 +14,7 @@ global:
   # than this number of labels are present on any sample post metric-relabeling,
   # the entire scrape will be treated as failed. 0 means no limit.
   label_limit: 30
-  
+
   # Limit on the length (in bytes) of each individual label name. If any label
   # name in a scrape is longer than this number post metric-relabeling, the
   # entire scrape will be treated as failed. Note that label names are UTF-8
@@ -98,51 +98,30 @@ scrape_configs:
       min_version: TLS10
 
 {% for item in role_prometheus_config_targets %}
-  - job_name: {{ item.key }}
-    scheme: 'https'
-    static_configs:
-      - targets:
-{% for url in item.value.urls %}
-        - {{ url }}
-{% endfor %}
-{% endfor %}
-
-{% for item in role_prometheus_config_targets_basicAuth %}
-  - job_name: {{ item.key }}
-    scheme: 'https'
-    basic_auth:
-      username: "{{ item.value.username }}"
-      password: "{{ item.value.password  }}"
-    static_configs:
-      - targets:
-{% for url in item.value.urls %}
-        - {{ url }}
-{% endfor %}
-{% endfor %}
-
-{% if role_prometheus_config_targets_bgptools_export_id is defined %}
-  - job_name: 'bgptools-export'
+  - job_name: {{ item }}
     scheme: https
-    metrics_path: /prom/{{ role_prometheus_config_targets_bgptools_export_id }}
-    scrape_interval: 30s
-    static_configs:
-      - targets:
-          - bgp.tools
-{% endif %}
-
-{% if role_prometheus_config_targets_node_exporter is defined %}
-  - job_name: node_exporter
-    #scheme: 'https'
+{% if role_prometheus_config_targets[item].basic_auth is defined %}
     basic_auth:
-      username: "{{ role_prometheus_config_targets_node_exporter_username }}"
-      password: "{{ role_prometheus_config_targets_node_exporter_password }}"
+      username: "{{ role_prometheus_config_targets[item].basic_auth.username }}"
+      password: "{{ role_prometheus_config_targets[item].basic_auth.password  }}"
+{% endif %}
+{% if role_prometheus_config_targets[item].scrape_interval is defined %}
+    scrape_interval: {{ role_prometheus_config_targets[item].scrape_interval }}
+{% endif %}
+{% if role_prometheus_config_targets[item].metrics_path is defined %}
+    metrics_path: {{ role_prometheus_config_targets[item].metrics_path }}
+{% endif %}
     static_configs:
-{% for node_exporter_item in role_prometheus_config_targets_node_exporter %}
-      - targets: [{{ node_exporter_item.url }}]
+{% for target in role_prometheus_config_targets[item].targets %}
+      - targets: ["{{ target }}"]
+{% if role_prometheus_config_targets[item].targets[target].labels is defined %}
         labels:
-          instance: {{ node_exporter_item.label }}
+{% for label in role_prometheus_config_targets[item].targets[target].labels %}
+          {{ label }}: {{ role_prometheus_config_targets[item].targets[target].labels[label] }}
 {% endfor %}
 {% endif %}
+{% endfor %}
+{% endfor %}
 
 {% if role_prometheus_config_targets_matrix is defined %}
   - job_name: 'synapse'

@@ -15,11 +15,6 @@ Docker Image: https://registry.hub.docker.com/r/prom/prometheus
 | role_prometheus_network | app-network |
 | role_prometheus_tmp_dir | /tmp/ansible-role-prometheus |
 | role_prometheus_config_targets | |
-| role_prometheus_config_targets_basicAuth | |
-| role_prometheus_config_targets_bgptools_export_id | |
-| role_prometheus_config_targets_node_exporter | [] |
-| role_prometheus_config_targets_node_exporter_username | |
-| role_prometheus_config_targets_node_exporter_password | |
 | role_prometheus_config_targets_matrix | [] |
 | role_prometheus_config_targets_matrix_username | |
 | role_prometheus_config_targets_matrix_password | |

@@ -14,6 +14,9 @@ Docker Image: https://registry.hub.docker.com/r/prom/prometheus
 | role_prometheus_volume | prometheus |
 | role_prometheus_network | app-network |
 | role_prometheus_tmp_dir | /tmp/ansible-role-prometheus |
+| role_prometheus_config_scrape_interval | 15s |
+| role_prometheus_config_evaluation_interval | 30s |
+| role_prometheus_config_sample_limit | 1500 |
 | role_prometheus_config_targets | |
 | role_prometheus_config_targets_matrix | [] |
 | role_prometheus_config_targets_matrix_username | |

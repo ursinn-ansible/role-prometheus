@@ -1,14 +1,14 @@
 global:
   # How frequently to scrape targets from this job.
-  scrape_interval: 15s
+  scrape_interval: {{ role_prometheus_config_scrape_interval }}
 
   # How frequently to evaluate rules.
-  evaluation_interval: 30s
+  evaluation_interval: {{ role_prometheus_config_evaluation_interval }}
 
   # Per-scrape limit on the number of scraped samples that will be accepted.
   # If more than this number of samples are present after metric relabeling
   # the entire scrape will be treated as failed. 0 means no limit.
-  sample_limit: 1500
+  sample_limit: {{ role_prometheus_config_sample_limit }}
 
   # Limit on the number of labels that will be accepted per sample. If more
   # than this number of labels are present on any sample post metric-relabeling,
@@ -40,7 +40,7 @@ global:
 scrape_configs:
 {% for item in role_prometheus_config_targets %}
   - job_name: {{ item }}
-    scheme: https
+    scheme: {{ role_prometheus_config_targets[item].scheme | default('https') }}
 {% if role_prometheus_config_targets[item].basic_auth is defined %}
     basic_auth:
       username: "{{ role_prometheus_config_targets[item].basic_auth.username }}"

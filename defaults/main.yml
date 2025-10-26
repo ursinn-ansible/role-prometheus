@@ -1,5 +1,5 @@
 ---
-role_prometheus_image: 'docker.io/prom/prometheus:v3.0.0'
+role_prometheus_image: 'docker.io/prom/prometheus:v3.7.2'
 role_prometheus_container: 'prometheus'
 role_prometheus_volume: 'prometheus'
 role_prometheus_network: 'app-network'
